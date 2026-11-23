@@ -1,30 +1,24 @@
-#!/usr/bin/env python3
-"""Copy the bundled front-page image to the make.fun output directory.
+"""Entry point: render THE WORLD IN ONE DAY front page to entry.png.
 
-The entry image (entry.png) sits next to this file in the repository.
-The grader runs this program twice with no network access; both runs
-must produce byte-identical output, which a plain file copy guarantees.
-Only the Python standard library is used.
+Stdlib only. Deterministic: the same bytes are produced on every run.
+Reads MAKEFUN_OUTPUT_DIR when set, otherwise writes to /output.
+The page is 1024x1024: masthead, lead headline, four illustrated cards,
+a two-column region index of 40 dated stories, and a numbers strip.
 """
-
 import os
+import sys
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-SOURCE = os.path.join(HERE, "entry.png")
-CHUNK = 65536
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import draw_frontpage
 
 
 def main():
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
     os.makedirs(out_dir, exist_ok=True)
-    target = os.path.join(out_dir, "entry.png")
-    with open(SOURCE, "rb") as src, open(target, "wb") as dst:
-        while True:
-            chunk = src.read(CHUNK)
-            if not chunk:
-                break
-            dst.write(chunk)
-    return target
+    png = draw_frontpage.encode_png(draw_frontpage.render())
+    with open(os.path.join(out_dir, "entry.png"), "wb") as fh:
+        fh.write(png)
 
 
 if __name__ == "__main__":
